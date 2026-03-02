@@ -1,0 +1,15 @@
+test subscription_flow {
+    given customer.id = "c1"
+    given customer.balance = 500
+    given customer.status = "active"
+    
+    when event subscription.created(customer_id="c1", amount=100)
+    
+    expect goal process_monthly_billing.active
+    expect action payment.charge(amount=100)
+    
+    when event payment.succeeded
+    
+    expect goal process_monthly_billing.done
+    expect state.customer.balance == 400
+}

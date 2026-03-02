@@ -1,0 +1,31 @@
+# Subscription Billing Logic
+
+# 1. Main Billing Goal: Success means payment.succeeded happened
+goal process_monthly_billing
+    priority: 100
+    trigger: event.subscription.created
+    condition: state.payment.status == "succeeded"
+    actions: [payment.charge, email.send]
+    spawn: retry_payment when state.payment.status == "failed"
+
+# 2. Retry Logic: Spawns only if payment fails
+goal retry_payment
+    priority: 50
+    trigger: event.payment.failed
+    condition: state.payment.status == "succeeded"
+    actions: [payment.charge, email.send]
+    spawn: suspend_account when state.retry_count >= 3
+
+# 3. Safety Policies
+policy limit_retries {
+    require state.retry_count <= 3
+}
+
+policy ensure_solvency {
+    require state.customer.balance >= 0
+}
+
+# 4. Events (Ontology)
+event subscription.created { customer_id: uuid, amount: float }
+event payment.succeeded { transaction_id: string }
+event payment.failed { error: string, code: int }

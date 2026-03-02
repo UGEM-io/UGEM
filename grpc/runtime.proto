@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package grpc;
+
+option go_package = "github.com/goalruntime/grpc";
+
+service GoalRuntime {
+  rpc SubmitGoal(SubmitGoalRequest) returns (SubmitGoalResponse);
+  rpc GetGoal(GetGoalRequest) returns (GetGoalResponse);
+  rpc ListGoals(ListGoalsRequest) returns (ListGoalsResponse);
+  rpc CancelGoal(CancelGoalRequest) returns (CancelGoalResponse);
+  rpc StreamEvents(StreamEventsRequest) returns (stream Event);
+  rpc GetMetrics(GetMetricsRequest) returns (GetMetricsResponse);
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message SubmitGoalRequest {
+  string name = 1;
+  string definition = 2;
+  map<string, string> metadata = 3;
+  int32 priority = 4;
+}
+
+message SubmitGoalResponse {
+  string goal_id = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message GetGoalRequest {
+  string goal_id = 1;
+}
+
+message GetGoalResponse {
+  Goal goal = 1;
+  string error = 2;
+}
+
+message ListGoalsRequest {
+  GoalStatus status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ListGoalsResponse {
+  repeated Goal goals = 1;
+  int32 total = 2;
+}
+
+message CancelGoalRequest {
+  string goal_id = 1;
+  string reason = 2;
+}
+
+message CancelGoalResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message StreamEventsRequest {
+  string goal_id = 1;
+  EventType event_type = 2;
+}
+
+enum EventType {
+  ALL = 0;
+  STATE_CHANGES = 1;
+  ACTION_EXECUTION = 2;
+  GOAL_LIFECYCLE = 3;
+}
+
+message Event {
+  string id = 1;
+  string goal_id = 2;
+  int64 timestamp = 3;
+  EventType type = 4;
+  string payload = 5;
+}
+
+message GetMetricsRequest {
+  string goal_id = 1;
+}
+
+message GetMetricsResponse {
+  Metrics metrics = 1;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string version = 2;
+  int64 uptime = 3;
+}
+
+message Goal {
+  string id = 1;
+  string name = 2;
+  string definition = 3;
+  GoalStatus status = 4;
+  int32 priority = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+  int64 deadline = 8;
+  map<string, string> metadata = 9;
+  repeated string dependencies = 10;
+  string error = 11;
+  int32 retry_count = 12;
+}
+
+enum GoalStatus {
+  PENDING = 0;
+  RUNNING = 1;
+  COMPLETED = 2;
+  FAILED = 3;
+  CANCELLED = 4;
+  PAUSED = 5;
+}
+
+message Metrics {
+  int64 total_goals = 1;
+  int64 active_goals = 2;
+  int64 completed_goals = 3;
+  int64 failed_goals = 4;
+  int64 actions_executed = 5;
+  double avg_execution_time_ms = 6;
+  int64 memory_usage_bytes = 7;
+}

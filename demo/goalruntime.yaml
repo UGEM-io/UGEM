@@ -1,0 +1,9 @@
+name: subscription_demo
+version: "1.0"
+apps:
+  - billing
+runtime:
+  mode: strict
+  http: ":8081"
+  grpc: ":50052"
+  log: debug

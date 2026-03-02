@@ -1,0 +1,24 @@
+# Shared data structures for the billing system
+
+type Customer struct {
+    id: uuid
+    email: string
+    balance: float
+    status: string # "active", "suspended"
+}
+
+type Subscription struct {
+    id: uuid
+    customer_id: uuid
+    plan: string # "pro", "enterprise"
+    amount: float
+    next_billing: time
+}
+
+contract BillingService {
+    event subscription.created
+    event payment.succeeded
+    event payment.failed
+    action payment.charge
+    action email.send
+}
