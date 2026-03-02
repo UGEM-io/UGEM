@@ -1,4 +1,4 @@
-# 🌌 Universal Goal Execution Model (UGEM) !(ugem.jpg)
+# 🌌 Universal Goal Execution Model (UGEM) 
 
 ---
 
